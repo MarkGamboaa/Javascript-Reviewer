@@ -55,6 +55,16 @@ pre select,.row select{font:13px ui-monospace,Consolas,monospace;background:var(
 .slot{display:inline-block;min-width:110px;padding:2px 8px;border:1.5px dashed var(--accent);border-radius:6px;background:var(--accent-soft);color:var(--accent);font:13px ui-monospace,Consolas,monospace;cursor:pointer;vertical-align:baseline}
 .slot.filled{border-style:solid;background:var(--card);color:var(--text)}
 .slot.over{background:var(--accent);color:#fff}
+.filled-ans{display:inline-flex;gap:8px;align-items:baseline;padding:1px 8px;border-radius:6px;border:1.5px solid var(--ok);background:var(--ok-soft);font:13px ui-monospace,Consolas,monospace;white-space:nowrap}
+.filled-ans b{color:var(--ok)}
+.filled-ans.bad{border-color:var(--bad)}
+.filled-ans s{color:var(--bad);opacity:.8}
+.row .filled-ans{padding:6px 10px;font-size:14px;white-space:normal}
+.anslist{list-style:none;padding-left:0!important}
+.anslist li{margin:4px 0}
+.anslist code{padding:1px 6px;border-radius:5px;font-size:.9em}
+.anslist .yes{background:var(--ok-soft);color:var(--ok);font-weight:600}
+.anslist .no{background:var(--bad-soft);color:var(--bad);text-decoration:line-through}
 .row .slot{min-width:150px;padding:6px 10px}
 select.ok,.slot.ok{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--text)}
 select.bad,.slot.bad{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--text)}
@@ -161,9 +171,12 @@ const correctText = q => q.type === 'mc' ? [q.answer] : q.blanks.map(b => b.answ
 
 function control(q, i, done) {
   const v = (S.resp[q.number] || [])[i];
-  const st = done ? (v === q.blanks[i].answer ? ' ok' : ' bad') : '';
-  if (isDrag(q)) return `<button class="slot${v != null ? ' filled' : ''}${st}" data-b="${i}" ${done ? 'disabled' : ''} aria-label="Drop target ${i + 1}">${v != null ? esc(v) : 'drop here'}</button>`;
-  return `<select data-b="${i}" class="${st.trim()}" ${done ? 'disabled' : ''} aria-label="Answer ${i + 1}"><option value="">— select —</option>${optsFor(q, i).map(o => `<option${o === v ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+  if (done) { // after submit the field itself shows the correct answer; a wrong pick is struck through inside it
+    const a = q.blanks[i].answer, ok = v === a;
+    return `<span class="filled-ans ${ok ? 'ok' : 'bad'}" aria-label="${ok ? 'Correct' : `Your answer ${esc(v || 'none')}, correct answer`}: ${esc(a)}">${ok ? '' : `<s>${esc(v || 'empty')}</s>`}<b>${esc(a)}</b></span>`;
+  }
+  if (isDrag(q)) return `<button class="slot${v != null ? ' filled' : ''}" data-b="${i}" aria-label="Drop target ${i + 1}">${v != null ? esc(v) : 'drop here'}</button>`;
+  return `<select data-b="${i}" aria-label="Answer ${i + 1}"><option value="">— select —</option>${optsFor(q, i).map(o => `<option${o === v ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
 }
 
 function render() {
@@ -203,7 +216,14 @@ function feedback(q) {
   const ok = isRight(q);
   let ans;
   if (q.type === 'mc') ans = `<pre><code>${hl(q.options.find(o => o.key === q.answer).code)}</code></pre>`;
-  else ans = `<ul>${q.blanks.map((b, i) => `<li>${q.rows ? esc(q.rows[i]) + ' → ' : ''}<code>${esc(b.answer)}</code></li>`).join('')}</ul>`;
+  else {
+    const r = S.resp[q.number] || [];
+    ans = `<ul class="anslist">${q.blanks.map((b, i) => {
+      const good = r[i] === b.answer;
+      return `<li>${q.rows ? esc(q.rows[i]) : `Blank ${i + 1}`}: ${good ? `<code class="yes">✓ ${esc(b.answer)}</code>`
+        : `<code class="no">✗ ${esc(r[i] || 'no answer')}</code> → <code class="yes">✓ ${esc(b.answer)}</code>`}</li>`;
+    }).join('')}</ul>`;
+  }
   return `<div class="fb ${ok ? 'ok' : 'bad'}"><h3>${ok ? '✓ Correct' : '✗ Incorrect'}</h3>
     <div class="muted">Correct answer (PDF answer key):</div>${ans}
     ${q.explanation ? `<div>${esc(q.explanation)}</div>` : ''}
