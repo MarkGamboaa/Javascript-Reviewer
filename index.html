@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaScript Review</title>
+<meta name="description" content="Practice quiz for Microsoft 98-382: Introduction to Programming Using JavaScript.">
+<style>
+:root{
+  --bg:#f6f7f9;--card:#fff;--text:#1c2330;--muted:#5d6878;--border:#dde2ea;
+  --accent:#3758f9;--accent-soft:#e8edff;--ok:#16794a;--ok-soft:#e3f5ec;--bad:#c0362c;--bad-soft:#fdecea;
+  --warn:#8a5a00;--warn-soft:#fff4dc;--code-bg:#f2f4f8;
+  --k:#8a3ffc;--s:#0e7a43;--n:#b35900;--c:#7b8494;--t:#1d5fc4;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1218;--card:#181c24;--text:#e5e9f0;--muted:#97a1b2;--border:#2a303c;
+  --accent:#7d93ff;--accent-soft:#232b48;--ok:#4cc38a;--ok-soft:#15301f;--bad:#ff7b6e;--bad-soft:#3a1c19;
+  --warn:#f0c065;--warn-soft:#33290f;--code-bg:#11151c;
+  --k:#c3a0ff;--s:#7fd4a4;--n:#ffb46b;--c:#6c7686;--t:#79b0ff;
+}}
+:root[data-theme="dark"]{
+  --bg:#0f1218;--card:#181c24;--text:#e5e9f0;--muted:#97a1b2;--border:#2a303c;
+  --accent:#7d93ff;--accent-soft:#232b48;--ok:#4cc38a;--ok-soft:#15301f;--bad:#ff7b6e;--bad-soft:#3a1c19;
+  --warn:#f0c065;--warn-soft:#33290f;--code-bg:#11151c;
+  --k:#c3a0ff;--s:#7fd4a4;--n:#ffb46b;--c:#6c7686;--t:#79b0ff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-bottom:12px}
+h1{font-size:1.15rem;margin:0}
+h1 small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toggle{display:flex;gap:6px;align-items:center;font-size:.85rem;color:var(--muted);cursor:pointer}
+button,select{font:inherit;color:inherit}
+.btn{border:1px solid var(--border);background:var(--card);border-radius:8px;padding:8px 14px;cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sm{padding:5px 10px;font-size:.85rem}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.progress{height:8px;background:var(--border);border-radius:99px;overflow:hidden}
+.progress>div{height:100%;background:var(--accent);transition:width .25s}
+.meta{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin:6px 0 14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+.qhead{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.qhead h2{font-size:1.05rem;margin:0}
+.badge{font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.prompt p{margin:0 0 10px}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;font:13.5px/1.7 ui-monospace,"Cascadia Code",Consolas,monospace;margin:0 0 14px}
+code{font-family:ui-monospace,"Cascadia Code",Consolas,monospace}
+.tk{color:var(--k)}.ts{color:var(--s)}.tn{color:var(--n)}.tc{color:var(--c);font-style:italic}.tt{color:var(--t)}
+pre select,.row select{font:13px ui-monospace,Consolas,monospace;background:var(--card);border:1.5px solid var(--accent);border-radius:6px;padding:2px 4px;max-width:100%}
+.row select{font-size:14px;padding:6px 8px}
+.slot{display:inline-block;min-width:110px;padding:2px 8px;border:1.5px dashed var(--accent);border-radius:6px;background:var(--accent-soft);color:var(--accent);font:13px ui-monospace,Consolas,monospace;cursor:pointer;vertical-align:baseline}
+.slot.filled{border-style:solid;background:var(--card);color:var(--text)}
+.slot.over{background:var(--accent);color:#fff}
+.row .slot{min-width:150px;padding:6px 10px}
+select.ok,.slot.ok{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--text)}
+select.bad,.slot.bad{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--text)}
+.bank{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;padding:10px;border:1px dashed var(--border);border-radius:10px}
+.bank .lbl{width:100%;font-size:.78rem;color:var(--muted)}
+.chip{font:13px ui-monospace,Consolas,monospace;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);cursor:grab}
+.chip.sel{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.rows{display:grid;gap:10px;margin-bottom:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--border);border-radius:10px}
+.row .lab{flex:1 1 260px}
+.opts{display:grid;gap:10px;margin-bottom:14px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);cursor:pointer}
+.opt pre{margin:0;flex:1;border:0;padding:0;background:none}
+.opt .key{font-weight:700;color:var(--muted);min-width:1.2em}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt.ok{border-color:var(--ok);background:var(--ok-soft)}
+.opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+.fb{margin-top:6px;border-radius:10px;padding:14px;border:1px solid}
+.fb.ok{background:var(--ok-soft);border-color:var(--ok)}
+.fb.bad{background:var(--bad-soft);border-color:var(--bad)}
+.fb h3{margin:0 0 6px;font-size:1rem}
+.fb ul{margin:4px 0 8px;padding-left:20px}
+.fb .refs a{color:var(--accent);word-break:break-all;font-size:.85rem}
+.note{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--warn-soft);color:var(--text);border-left:4px solid var(--warn);font-size:.92rem}
+.note b{color:var(--warn)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;margin-top:16px}
+.actions .grp{display:flex;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px;margin-bottom:14px}
+.grid button{aspect-ratio:1;border:1px solid var(--border);border-radius:8px;background:var(--card);cursor:pointer;font-size:.85rem}
+.grid .ans{border-color:var(--accent)}
+.grid .ok{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.grid .bad{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.grid .cur{outline:2px solid var(--accent);outline-offset:1px;font-weight:700}
+.score{text-align:center;padding:10px 0 6px}
+.score .big{font-size:2.6rem;font-weight:800}
+.review{margin-top:18px;display:grid;gap:12px}
+.review .item{border:1px solid var(--border);border-radius:10px;padding:12px}
+.review .item h4{margin:0 0 6px;font-size:.95rem}
+.muted{color:var(--muted);font-size:.88rem}
+@media (max-width:520px){.card{padding:14px}.actions .btn{flex:1}.actions,.actions .grp{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>JavaScript Review</h1>
+    <div class="tools">
+      <label class="toggle"><input type="checkbox" id="shufQ"> Shuffle questions</label>
+      <label class="toggle"><input type="checkbox" id="shufA"> Shuffle answers</label>
+      <button class="btn sm" id="theme" aria-label="Toggle dark mode">🌙 Dark</button>
+      <button class="btn sm" id="reset">Restart</button>
+    </div>
+  </header>
+  <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+  <div class="meta"><span id="counter"></span><span id="answered"></span></div>
+  <nav class="grid" id="grid" aria-label="Question navigator"></nav>
+  <main id="main" class="card" aria-live="polite"></main>
+</div>
+
+<script id="qdata" type="application/json">{"exam":"Microsoft 98-382: Introduction to Programming Using JavaScript","format":"Non-MC questions use `blanks` (one per dropdown / drop target). A blank is placed either inline in `template` via {{n}} or as a labelled row in `rows`. `answer` is the PDF answer key. `note` flags where the PDF key disagrees with how JavaScript actually behaves.","questions":[{"number":1,"type":"dragdrop","prompt":"You are creating a web page that tests a user's ability to accurately type text. The validation should be case-insensitive.\n\nHow should you complete the code? Drag appropriate functions to the correct locations. Each function may be used once, more than once, or not at all.","bank":["value","innerHTML","toLowerCase()"],"template":"\u003c!DOCTYPE html>\n\u003chtml>\n\u003chead>\n  \u003cscript>\n    function validate() {\n      var input = document.getElementById(\"tester\").{{0}};\n      var text = document.getElementById(\"userText\").{{1}};\n      if(input.{{2}} == text.{{3}})\n      {\n        alert(\"Success\");\n      }\n    }\n  \u003c/script>\n\u003c/head>\n\u003cbody>\n  \u003cp id=\"userText\">When in the course of human events...\u003c/p>\n  \u003cinput type=\"input\" id=\"tester\"; />\n  \u003cbutton onclick=\"validate()\">Validate\u003c/button>\n\u003c/body>\n\u003c/html>","blanks":[{"answer":"value"},{"answer":"innerHTML"},{"answer":"value"},{"answer":"innerHTML"}],"explanation":"An \u003cinput> exposes what the user typed through .value; a \u003cp> exposes its text through .innerHTML.","note":"The PDF key fills the if-statement with value / innerHTML. That doesn't work: input and text are already strings, so input.value and text.innerHTML are both undefined and the test always passes. For a case-insensitive check, the if-statement should be input.toLowerCase() == text.toLowerCase().","references":["https://www.w3schools.com/jsref/prop_text_value.asp"]},{"number":2,"type":"hotspot","prompt":"You evaluate the following code. You need to determine the values of sampleStudent, sampleCourse.name, and sampleCourse.grade that are output by console.log().\n\nWhat are the final values for the three variables?","code":"function change(student, course)\n{\n    student = \"JavaScript Student\";\n    course.name = \"JavaScript\";\n    course.grade = 100;\n}\n\nvar sampleCourse = { \"name\": \"HTML\", \"grade\": 90 };\nvar sampleStudent = \"HTML Student\";\n\nchange(sampleStudent, sampleCourse);\nconsole.log(sampleStudent, sampleCourse.name, sampleCourse.grade);","rows":["sampleStudent =","sampleCourse.name =","sampleCourse.grade ="],"blanks":[{"options":["HTML Student","JavaScript Student"],"answer":"HTML Student"},{"options":["HTML","JavaScript"],"answer":"JavaScript"},{"options":["90","100"],"answer":"100"}],"explanation":"Strings are passed by value, so reassigning student inside the function does not change sampleStudent. Objects are passed by reference, so changes to course.name and course.grade are visible outside the function.","references":["https://www.w3schools.com/js/js_output.asp"]},{"number":3,"type":"dragdrop","prompt":"A JavaScript array is initialized as follows:\n\nvar array = [20, 40, 60, 80];\n\nYou write the code below to manipulate the array. Which four elements does the array contain, in sequence? Move the appropriate elements to the answer area and arrange them in the correct order.","code":"array.shift();\narray.pop();\narray.push(10);\narray.unshift(100);","bank":["10","20","40","60","80","100"],"rows":["Element 1","Element 2","Element 3","Element 4"],"blanks":[{"answer":"100"},{"answer":"40"},{"answer":"60"},{"answer":"10"}],"explanation":"shift() removes 20 → [40,60,80]. pop() removes 80 → [40,60]. push(10) appends → [40,60,10]. unshift(100) prepends → [100,40,60,10].","references":["https://www.bennadel.com/blog/1796-javascript-array-methods-unshift-shift-push-and-pop.htm"]},{"number":4,"type":"hotspot","prompt":"You need to evaluate the following code segment. Line numbers are included for reference only.\n\nUse the drop-down menus to select the answer choice that answers each question.","code":"01 var n;\n02 console.log(typeof n);\n03 var a = \"3.4\";\n04 console.log(typeof a);\n05 var textArray = [\"Welcome Back\", \"Enter a Name\", \"Incorrect Answer\"];\n06 console.log(typeof textArray);\n07 var c = 2.4;\n08 console.log(typeof c);\n09 var tag = null;\n10 console.log(typeof tag);","rows":["What does console.log on line 02 write to the console?","What does console.log on line 04 write to the console?","What does console.log on line 06 write to the console?","What does console.log on line 08 write to the console?","What does console.log on line 10 write to the console?"],"blanks":[{"options":["string","array","object","number","undefined"],"answer":"undefined"},{"options":["string","array","object","number","undefined"],"answer":"string"},{"options":["string","array","object","number","undefined"],"answer":"array"},{"options":["string","array","object","number","undefined"],"answer":"number"},{"options":["string","array","object","number","undefined"],"answer":"object"}],"explanation":"An unassigned variable is undefined. \"3.4\" is a string. 2.4 is a number. typeof null is \"object\" (a long-standing quirk of the language).","note":"The PDF key says line 06 prints \"array\". In real JavaScript, typeof [] is \"object\". Use Array.isArray() to detect arrays.","references":[]},{"number":5,"type":"mc","prompt":"You are writing an engineering application. You need to create a function that will round numbers to 3 or more decimal places.\n\nThe function receives two parameters:\n• value: the number to be formatted\n• digits: the number of digits to display\n\nThe function must return the value with the number of digits specified. Which function should you use?","options":[{"key":"A","code":"function significance(value, digits) {\n    return value.toPrecision(digits);\n}"},{"key":"B","code":"function significance(value, digits) {\n    return value.toString(digits);\n}"},{"key":"C","code":"function significance(value, digits) {\n    return value.toFixed(digits);\n}"},{"key":"D","code":"function significance(value, digits) {\n    return value.valueOf(digits);\n}"}],"answer":"C","explanation":"toFixed(digits) formats a number with exactly that many digits after the decimal point. toPrecision counts total significant digits, toString(digits) treats the argument as a radix (base), and valueOf ignores its argument.","references":["https://www.w3schools.com/jsref/jsref_tofixed.asp"]},{"number":6,"type":"hotspot","prompt":"You analyze the following code fragment. Line numbers are included for reference only.\n\nFor each statement, select Yes if it is true. Otherwise, select No.","code":"01 \"use strict\";\n02 var val1 = 25;\n03 var val2 = 4;\n04 function multiply() {\n05     return val1 * val2;\n06 }\n07\n08 console.log(\"Global multiply returns() : \" + multiply());\n09 multiply();\n10\n11 function getProduct() {\n12     var val1 = 2;\n13     var val2 = 3;\n14\n15     function multiply() {\n16         return val1 * val2;\n17     }\n18\n19     return multiply();\n20 }","rows":["The call to the multiply function on line 09 returns 100.","The call to the multiply function on line 19 returns 100."],"blanks":[{"options":["Yes","No"],"answer":"Yes"},{"options":["Yes","No"],"answer":"No"}],"explanation":"Line 09 calls the global multiply, which uses the global values 25 * 4 = 100. Line 19 calls the inner multiply, which uses the local values 2 * 3 = 6.","references":[]},{"number":7,"type":"hotspot","prompt":"You are creating a JavaScript function that returns a date the specified number of months in the future of the current date.\n\nThe function must:\n• Accept a number that represents the number of months to add or subtract from the current date.\n• Return the current date adjusted by the number of months passed into the function.\n\nHow should you complete the code?","template":"function adjustMonth(value) {\n    {{0}}\n    {{1}}\n    {{2}}\n    return date;\n}","blanks":[{"options":["var date = new Date();","var date = Date();","var date = new Date;","var date = Date;"],"answer":"var date = new Date();"},{"options":["var month = date.getMonth;","var month = getMonth();","var month = date.getMonth();","var month = getMonth;"],"answer":"var month = date.getMonth();"},{"options":["date.setMonth(month + value);","setMonth(month + value);"],"answer":"date.setMonth(month + value);"}],"explanation":"new Date() creates a Date object for now (Date() without new returns a string). getMonth() and setMonth() are methods, so they must be called on the date object with parentheses. setMonth handles year rollover automatically.","references":["https://www.w3schools.com/js/js_dates.asp","https://www.w3schools.com/js/js_date_methods.asp","https://www.w3schools.com/jsref/jsref_setmonth.asp"]},{"number":8,"type":"hotspot","prompt":"You work as a JavaScript developer for Adventure Works. You are writing a simple script that:\n• Declares and initializes an array\n• Fills the array with 10 random integers\n• Adds every other number starting with the first element\n\nHow should you complete the code?","template":"var numbers = {{0}};\nfor (var i = 0; i \u003c 10; i++) {\n    numbers.{{1}}(Math.round(Math.abs(Math.random() * 10)));\n}\nvar sum = 0;\nfor (var j = 0; j \u003c 10; j = {{2}}) {\n    sum += {{3}};\n}\nconsole.log(sum);","blanks":[{"options":["()","{}","[]","\"\""],"answer":"[]"},{"options":["pop","push","sort","splice"],"answer":"push"},{"options":["j++","j+1","j+2","j--"],"answer":"j++"},{"options":["sum[j]","numbers[j]","numbers(j)","array[j]"],"answer":"array[j]"}],"explanation":"[] creates an empty array literal and push() appends each random integer.","note":"The PDF key's last two answers are wrong. j = j++ assigns the old value back to j, so the loop never ends. To add every other element, use j = j+2. There is no variable named array, so the sum must use numbers[j].","references":["https://www.w3schools.com/jsref/jsref_push.asp","https://www.w3schools.com/js/js_arrays.asp","https://stackoverflow.com/questions/9813573/how-to-perform-a-sum-of-an-int-array"]},{"number":9,"type":"hotspot","prompt":"You are writing a JavaScript program for Blue Yonder Airlines. The program stores various information about the airline's flights. It has initialized the following variables.\n\nDetermine the data type for each line, based on the initialization and assignment of the variables.","code":"01 var flightDestination = \"Denver\";\n02 var flight = 5;\n03 var roundTrip = 2489.58;\n04 var onTime = true;\n05 var id = flight + flightDestination;","rows":["What is the data type for line 01?","What is the data type for line 03?","What is the data type for line 04?","What is the data type for line 05?"],"blanks":[{"options":["Number","String","Boolean","Null","Undefined"],"answer":"String"},{"options":["Number","String","Boolean","Null","Undefined"],"answer":"Number"},{"options":["Number","String","Boolean","Null","Undefined"],"answer":"Boolean"},{"options":["Number","String","Boolean","Null","Undefined"],"answer":"Number"}],"explanation":"Quoted text is a String, 2489.58 is a Number, and true is a Boolean.","note":"The PDF key says line 05 is a Number. In real JavaScript, 5 + \"Denver\" is the string \"5Denver\": when one operand of + is a string, + concatenates.","references":["https://www.w3schools.com/js/js_datatypes.asp"]},{"number":10,"type":"hotspot","prompt":"You are planning to use the Math object in a JavaScript application. You write the following code to evaluate various Math functions.\n\nWhat are the final values for the three variables?","code":"var ceil = Math.ceil(100.5);\nvar floor = Math.floor(100.5);\nvar round = Math.round(100.5);","rows":["ceil =","floor =","round ="],"blanks":[{"options":["100","101"],"answer":"101"},{"options":["100","101"],"answer":"100"},{"options":["100","101"],"answer":"101"}],"explanation":"ceil rounds up (101), floor rounds down (100), and round rounds .5 up to the next integer (101).","references":["https://www.w3schools.com/js/js_math.asp"]},{"number":11,"type":"hotspot","prompt":"You are creating JavaScript code that manipulates dates. You want to initialize a Date object with the date January 1, 2017 by using the year, month, and date parameters.\n\nHow should you complete the code?","template":"var date = new Date({{0}}, {{1}}, {{2}});","blanks":[{"options":["17","2017"],"answer":"2017"},{"options":["0","1","Jan","January"],"answer":"0"},{"options":["0","1"],"answer":"1"}],"explanation":"Use the full 4-digit year (a 2-digit year is read as 19xx). Months are zero-based (January = 0), but the day of the month starts at 1.","references":["https://www.w3schools.com/js/js_dates.asp"]},{"number":12,"type":"hotspot","prompt":"Your instructor has asked you to write a program that uses simple rules to help determine if a person should take the train, drive their car, or ride a bike, depending on the weather and the amount of gas in the car's tank.\n\nRequirements:\n• When the temperature is above 65 degrees and it is not raining, the person should be told to ride their bike.\n• When it is raining, the person should be told to drive their car.\n• If their car has half a tank of gas or less, they should be told to take the train.\n\nHow should you complete the code?","template":"if(temperature > 65 {{0}} !raining)\n    advice = \"Ride Bike\";\nelse if(fuelTank {{1}} .5)\n    advice = \"Take Train\";\nelse\n    advice = \"Drive your car\";","blanks":[{"options":["&&","==","||","&",">"],"answer":"&&"},{"options":["==","||","\u003c=","&&",">"],"answer":"\u003c="}],"explanation":"Both conditions (warm AND not raining) must hold, so use logical AND (&&). \"Half a tank or less\" means fuelTank \u003c= .5.","references":["https://www.w3schools.com/jsref/jsref_operators.asp"]},{"number":13,"type":"hotspot","prompt":"You are using JavaScript to create a function that calculates admission price.\n\nRequirements:\n• The function accepts the age of the customer as a parameter\n• A customer who is less than 5 years old gets in free\n• A customer who is 65 years old or older gets in free\n• A customer who is 5 to 17 years old pays $10 USD\n• All other customers pay $20 USD\n\nHow should you complete the code?","template":"function ticketPrice(age) {\n    var price = 20;\n    {{0}}\n        price = 0;\n    }\n    {{1}}\n        price = 10;\n    }\n    return price;\n}","blanks":[{"options":["if (age \u003c= 5 && age > 65) {","if (age \u003c 5 && age >= 65) {","if (age \u003c= 5 || age > 65) {","if (age \u003c 5 || age >= 65) {"],"answer":"if (age \u003c 5 || age >= 65) {"},{"options":["if (age >= 5 && age \u003c 18) {","if (age > 5 && age \u003c= 18) {","if (age >= 5 || age \u003c 18) {","if (age > 5 || age \u003c= 18) {"],"answer":"if (age >= 5 && age \u003c 18) {"}],"explanation":"Free entry applies to either group (under 5 OR 65 and over), so use ||. The $10 band must satisfy both bounds (5 or older AND under 18), so use &&.","references":["https://www.w3schools.com/jsref/jsref_operators.asp"]},{"number":14,"type":"hotspot","prompt":"The ABC company offers a mid-week discount of 10% on Wednesdays. You need to write a JavaScript function that:\n• Accepts the day of the week as a string\n• Returns the appropriate discount\n\nYou must complete the code at lines 03, 04, and 07.","template":"01 function getDiscount(day) {\n02     var discount = 0;\n03     {{0}}\n04         {{1}}\n05             discount = .1;\n06             break;\n07         {{2}}\n08             discount = 0;\n09             break;\n10     }\n11     return discount;\n12 }","blanks":[{"options":["case (day) {","default (day) {","case (default) {","switch (day) {"],"answer":"switch (day) {"},{"options":["case \"Wednesday\":","default:","case default:","switch \"Wednesday\""],"answer":"case \"Wednesday\":"},{"options":["case \"Wednesday\":","default:","case default:","switch \"Wednesday\":"],"answer":"default:"}],"explanation":"A switch statement tests day; case \"Wednesday\": handles the discount day; default: handles every other day.","references":["https://www.w3schools.com/jsref/jsref_switch.asp"]},{"number":15,"type":"dragdrop","prompt":"You need to write a loop that will traverse the length of an array to find the value orange. If an array element value is null, the code should immediately go to the next element. When the value is found, the loop should exit.\n\nHow should you complete the code? Drag appropriate keywords to the correct locations. Each keyword may be used once, more than once, or not at all.","bank":["for","break","continue","while","do"],"template":"\u003c!DOCTYPE html>\n\u003chtml>\n\u003chead>\n\u003cscript>\n  function doWork() {\n    var list = ['apple', 'pear', null, 'orange', 'banana'];\n    {{0}} (i = 0; i \u003c list.length; i++) {\n      if(list[i] == null)\n        {{1}}\n      if(list[i] == 'orange') {\n        alert('found');\n        {{2}}\n      }\n      console.log(list[i]);\n    }\n  }\n\u003c/script>\n\u003c/head>\n\u003cbody>\n  \u003cinput type=\"button\" value=\"test\" onclick=\"doWork()\" />\n\u003c/body>\n\u003c/html>","blanks":[{"answer":"for"},{"answer":"continue"},{"answer":"break"}],"explanation":"The (init; condition; increment) header is a for loop. continue skips to the next iteration (for null values), and break exits the loop once 'orange' is found.","references":["https://www.w3schools.com/js/js_arrays.asp","https://www.w3schools.com/js/js_break.asp"]},{"number":16,"type":"hotspot","prompt":"You are creating a function named countdown. The function accepts a single parameter, start, and displays a countdown from that number down to zero in increments of one.\n\nHow should you complete the code?","template":"function countdown(start) {\n    for ({{0}} {{1}} {{2}}) {\n        console.log(i);\n    }\n}","blanks":[{"options":["var i = start;","var i == start;","var i \u003c= start;","var i \u003c start;"],"answer":"var i = start;"},{"options":["i\u003c=0;","i\u003c0;","i>0;","i>=0;"],"answer":"i>0;"},{"options":["++i","+i","--i","-i"],"answer":"--i"}],"explanation":"Start i at start and decrement with --i after each pass.","note":"The PDF key picks i>0, which stops at 1 and never prints 0. To count down to zero, the condition must be i>=0.","references":["https://www.w3schools.com/js/js_operators.asp"]},{"number":17,"type":"hotspot","prompt":"You are creating a calendar application. You need to ensure that the code works correctly for all months of the year.\n\nHow should you complete the code?","template":"var daysInMonth;\nvar month;\nmonth = new Date().getMonth();\n{{0}}\n    case 1:\n        daysInMonth = 28; // for February, ignore leap years\n        {{1}}\n    case 3:\n    case 5:\n    case 8:\n    case 10:\n        daysInMonth = 30;\n        {{2}}","blanks":[{"options":["switch (month) {","case (month) {","break {"],"answer":"switch (month) {"},{"options":["break;","continue;","while (month);"],"answer":"continue;"},{"options":["break;","continue;","while (month);"],"answer":"break;"}],"explanation":"switch (month) selects the case. Each case must end with break; so it does not fall through into the next case.","note":"The PDF key picks continue; after case 1. That is a SyntaxError here, because continue is only valid inside a loop. The correct answer is break;.","references":["https://www.w3schools.com/js/js_break.asp","https://www.w3schools.com/jsref/jsref_switch.asp"]},{"number":18,"type":"hotspot","prompt":"You are creating a function that does safe division.\n\nRequirements:\n• The function receives two parameters for the numerator and denominator.\n• If the denominator is zero, the function must return false.\n• If the denominator is not zero, the function must return true.\n\nYou write the following code. For each statement, select Yes if it is true. Otherwise, select No.","code":"01 function isSafeDivide(numerator, denominator) {\n02     if (denominator = 0) {\n03         return false;\n04     } else {\n05         return true;\n06     }\n07 }","rows":["The function will always return false.","The operator at line 02 should be !="],"blanks":[{"options":["Yes","No"],"answer":"No"},{"options":["Yes","No"],"answer":"No"}],"explanation":"denominator = 0 is an assignment, and its value 0 is falsy, so the function always returns true, not false. The operator should be == (or ===), not !=.","references":["https://www.w3schools.com/js/js_comparisons.asp","https://www.w3schools.com/jsref/jsref_if.asp"]},{"number":19,"type":"hotspot","prompt":"Variable x has a value of 5. Variable y has a value of 7.\n\nFor each expression, select True if it evaluates to true. Otherwise, select False.","rows":["x \u003c 7 && y > 6","x == 6 || y == 6","x !== 7","!(x == y)"],"rowsAreCode":true,"blanks":[{"options":["True","False"],"answer":"True"},{"options":["True","False"],"answer":"False"},{"options":["True","False"],"answer":"True"},{"options":["True","False"],"answer":"True"}],"explanation":"5 \u003c 7 && 7 > 6 is true. 5 == 6 || 7 == 6 is false. 5 !== 7 is true. 5 == 7 is false, so !(false) is true.","references":["https://www.w3schools.com/js/js_comparisons.asp"]},{"number":20,"type":"dragdrop","prompt":"You are developing a web page that uses JavaScript. The script needs to display information to the user using a popup box.\n\nMatch each function that displays a popup box with its appropriate scenario. Each function may be used once, more than once, or not at all.","bank":["alert","confirm","prompt"],"rows":["Display a dialog box that allows the user to enter a street address.","Display an error message using a function that does not return a value.","Display a dialog box and return a value indicating which button the user clicked."],"blanks":[{"answer":"prompt"},{"answer":"alert"},{"answer":"confirm"}],"explanation":"prompt() returns the text the user typed. alert() only shows a message and returns undefined. confirm() returns true (OK) or false (Cancel).","references":["https://www.w3schools.com/js/js_popup.asp"]},{"number":21,"type":"hotspot","prompt":"You are designing a function that allows you to perform unit tests on other functions in a library. You will invoke each library function by using the eval JavaScript function. If an exception occurs when invoking a function, you want to display a message box with the message: The function does not exist.\n\nHow should you complete the code?","template":"function unitTest(expression)\n{\n    {{0}}\n    {\n        eval(expression);\n    }\n    {{1}} (err)\n    {\n        alert(\"The function does not exist.\");\n    }\n}","blanks":[{"options":["catch","finally","try"],"answer":"try"},{"options":["catch","finally","try"],"answer":"catch"}],"explanation":"Code that might throw goes in a try block. catch (err) runs only when an exception is thrown. finally would run every time.","references":["https://www.w3schools.com/jsref/jsref_try_catch.asp"]}]}</script>
+<script>
+const LS = 'jsq-382-v1', THEME = 'jsq-382-theme';
+let Q = {}, S = null, picked = null; // picked = chip value chosen by tap (mobile drag alternative)
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const save = () => { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} };
+
+// Tiny JS/HTML highlighter: good enough for exam snippets, avoids a CDN dependency.
+const TOK = /(\/\/.*$)|("(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*')|(<\/?[a-zA-Z!][^>]*>)|\b(var|let|const|function|return|if|else|for|while|do|switch|case|default|break|continue|new|typeof|try|catch|finally|true|false|null|undefined)\b|(\b\d+(?:\.\d+)?\b)/gm;
+function hl(src) {
+  let out = '', last = 0;
+  for (const m of src.matchAll(TOK)) {
+    out += esc(src.slice(last, m.index));
+    const cls = m[1] ? 'tc' : m[2] ? 'ts' : m[3] ? 'tt' : m[4] ? 'tk' : 'tn';
+    out += `<span class="${cls}">${esc(m[0])}</span>`;
+    last = m.index + m[0].length;
+  }
+  return out + esc(src.slice(last));
+}
+
+const isDrag = q => q.type === 'dragdrop';
+const optsFor = (q, i) => (S.opts[q.number] || {})[i] || q.blanks[i].options;
+function makeOpts() {
+  S.opts = {};
+  for (const q of Object.values(Q)) {
+    const o = {};
+    if (q.type === 'mc') o.mc = S.shufA ? shuffle(q.options.map(x => x.key)) : q.options.map(x => x.key);
+    else if (isDrag(q)) o.bank = S.shufA ? shuffle(q.bank) : q.bank;
+    else q.blanks.forEach((b, i) => o[i] = S.shufA ? shuffle(b.options) : b.options);
+    S.opts[q.number] = o;
+  }
+}
+function start(ids, retry) {
+  S = { ids: ids.slice(), order: S && S.shufQ ? shuffle(ids) : ids.slice(), pos: 0, resp: {}, done: {}, finished: false, retry: !!retry,
+        shufQ: S ? S.shufQ : false, shufA: S ? S.shufA : false, opts: {} };
+  makeOpts(); save(); render();
+}
+const isRight = q => {
+  const r = S.resp[q.number] || [];
+  return q.type === 'mc' ? r[0] === q.answer : q.blanks.every((b, i) => r[i] === b.answer);
+};
+const correctText = q => q.type === 'mc' ? [q.answer] : q.blanks.map(b => b.answer);
+
+function control(q, i, done) {
+  const v = (S.resp[q.number] || [])[i];
+  const st = done ? (v === q.blanks[i].answer ? ' ok' : ' bad') : '';
+  if (isDrag(q)) return `<button class="slot${v != null ? ' filled' : ''}${st}" data-b="${i}" ${done ? 'disabled' : ''} aria-label="Drop target ${i + 1}">${v != null ? esc(v) : 'drop here'}</button>`;
+  return `<select data-b="${i}" class="${st.trim()}" ${done ? 'disabled' : ''} aria-label="Answer ${i + 1}"><option value="">— select —</option>${optsFor(q, i).map(o => `<option${o === v ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+}
+
+function render() {
+  const n = S.order.length, doneCount = Object.keys(S.done).length;
+  $('#bar').style.width = (S.finished ? 100 : (S.pos + 1) / n * 100) + '%';
+  $('#counter').textContent = S.finished ? 'Results' : `${S.pos + 1} of ${n}${S.retry ? ' (retry)' : ''}`;
+  $('#answered').textContent = `${doneCount} submitted`;
+  $('#shufQ').checked = S.shufQ; $('#shufA').checked = S.shufA;
+  renderGrid();
+  if (S.finished) return renderScore();
+  const q = Q[S.order[S.pos]], done = !!S.done[q.number], r = S.resp[q.number] || [];
+  let h = `<div class="qhead"><h2>Question ${q.number}</h2><span class="badge">${{mc:'Multiple choice',dragdrop:'Drag & drop',hotspot:'Hotspot'}[q.type]}</span></div>`;
+  h += `<div class="prompt">${q.prompt.split('\n\n').map(p => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`).join('')}</div>`;
+  if (q.code) h += `<pre><code>${hl(q.code)}</code></pre>`;
+  if (isDrag(q) && !done) h += `<div class="bank"><span class="lbl">Drag an item onto a target, or tap an item and then tap a target. Tap a filled target to clear it.</span>${S.opts[q.number].bank.map(b => `<button class="chip${picked === b ? ' sel' : ''}" draggable="true" data-v="${esc(b)}">${esc(b)}</button>`).join('')}</div>`;
+  if (q.type === 'mc') {
+    h += `<div class="opts" role="radiogroup">${S.opts[q.number].mc.map((k, idx) => {
+      const o = q.options.find(x => x.key === k);
+      const cls = done ? (k === q.answer ? ' ok' : r[0] === k ? ' bad' : '') : r[0] === k ? ' sel' : '';
+      return `<button class="opt${cls}" role="radio" aria-checked="${r[0] === k}" data-k="${k}" ${done ? 'disabled' : ''}><span class="key">${'ABCD'[idx]}.</span><pre><code>${hl(o.code)}</code></pre></button>`;
+    }).join('')}</div>`;
+  } else if (q.template) {
+    const parts = q.template.split(/\{\{(\d+)\}\}/);
+    h += `<pre><code>${parts.map((p, k) => k % 2 ? control(q, +p, done) : hl(p)).join('')}</code></pre>`;
+  } else {
+    h += `<div class="rows">${q.rows.map((lab, i) => `<div class="row"><span class="lab">${q.rowsAreCode ? `<code>${hl(lab)}</code>` : esc(lab)}</span>${control(q, i, done)}</div>`).join('')}</div>`;
+  }
+  if (done) h += feedback(q);
+  const last = S.pos === n - 1;
+  h += `<div class="actions"><div class="grp"><button class="btn" id="prev" ${S.pos ? '' : 'disabled'}>← Previous</button></div>
+    <div class="grp">${done ? '' : `<button class="btn primary" id="submit">Submit</button>`}
+    <button class="btn${done ? ' primary' : ''}" id="next">${last ? 'Finish' : 'Next →'}</button></div></div>`;
+  $('#main').innerHTML = h;
+}
+
+function feedback(q) {
+  const ok = isRight(q);
+  let ans;
+  if (q.type === 'mc') ans = `<pre><code>${hl(q.options.find(o => o.key === q.answer).code)}</code></pre>`;
+  else ans = `<ul>${q.blanks.map((b, i) => `<li>${q.rows ? esc(q.rows[i]) + ' → ' : ''}<code>${esc(b.answer)}</code></li>`).join('')}</ul>`;
+  return `<div class="fb ${ok ? 'ok' : 'bad'}"><h3>${ok ? '✓ Correct' : '✗ Incorrect'}</h3>
+    <div class="muted">Correct answer (PDF answer key):</div>${ans}
+    ${q.explanation ? `<div>${esc(q.explanation)}</div>` : ''}
+    ${q.note ? `<div class="note"><b>Heads up:</b> ${esc(q.note)}</div>` : ''}
+    ${q.references && q.references.length ? `<div class="refs" style="margin-top:8px">${q.references.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join('<br>')}</div>` : ''}</div>`;
+}
+
+function renderGrid() {
+  $('#grid').innerHTML = S.order.map((num, i) => {
+    const q = Q[num], cls = S.done[num] ? (isRight(q) ? 'ok' : 'bad') : (S.resp[num] || []).some(v => v != null && v !== '') ? 'ans' : '';
+    return `<button class="${cls}${!S.finished && i === S.pos ? ' cur' : ''}" data-go="${i}" aria-label="Question ${num}${cls === 'ok' ? ', correct' : cls === 'bad' ? ', incorrect' : ''}">${num}</button>`;
+  }).join('');
+}
+
+function renderScore() {
+  const qs = S.order.map(n => Q[n]), wrong = qs.filter(q => !isRight(q)), right = qs.length - wrong.length;
+  const pct = Math.round(right / qs.length * 100);
+  let h = `<div class="score"><div class="muted">${S.retry ? 'Retry round' : 'Final score'}</div><div class="big">${right} / ${qs.length}</div><div>${pct}% correct</div></div>
+    <div class="actions" style="justify-content:center">${wrong.length ? `<button class="btn primary" id="retry">Retry wrong answers only (${wrong.length})</button>` : ''}<button class="btn" id="again">Restart all 21</button></div>`;
+  if (wrong.length) h += `<h3 style="margin-top:22px">Review wrong answers</h3><div class="review">${wrong.map(q => {
+    const r = S.resp[q.number] || [], c = correctText(q);
+    const lines = c.map((a, i) => `<li>${q.rows ? esc(q.rows[i]) + ': ' : q.template ? `Blank ${i + 1}: ` : ''}your answer <code>${esc(r[i] || '—')}</code> · correct <code>${esc(a)}</code></li>`).join('');
+    return `<div class="item"><h4>Question ${q.number}</h4><div class="muted">${esc(q.prompt.split('\n')[0])}</div><ul>${lines}</ul>${q.explanation ? `<div>${esc(q.explanation)}</div>` : ''}${q.note ? `<div class="note"><b>Heads up:</b> ${esc(q.note)}</div>` : ''}</div>`;
+  }).join('')}</div>`;
+  else h += `<p style="text-align:center">All correct. 🎉</p>`;
+  $('#main').innerHTML = h;
+}
+
+function setResp(q, i, v) {
+  const r = S.resp[q.number] = (S.resp[q.number] || []).slice();
+  r[i] = v === '' ? null : v; save();
+}
+function go(i) { S.pos = Math.max(0, Math.min(S.order.length - 1, i)); S.finished = false; picked = null; save(); render(); window.scrollTo({top: 0}); }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  const q = S.finished ? null : Q[S.order[S.pos]];
+  if (t.id === 'prev') go(S.pos - 1);
+  else if (t.id === 'next') { if (S.pos === S.order.length - 1) { S.finished = true; save(); render(); window.scrollTo({top: 0}); } else go(S.pos + 1); }
+  else if (t.id === 'submit') {
+    const r = S.resp[q.number] || [], need = q.type === 'mc' ? 1 : q.blanks.length;
+    if (r.filter(v => v != null && v !== '').length < need && !confirm('Some answers are empty. Submit anyway?')) return;
+    S.done[q.number] = true; save(); render();
+  }
+  else if (t.dataset.go) go(+t.dataset.go);
+  else if (t.dataset.k) { setResp(q, 0, t.dataset.k); render(); }
+  else if (t.classList.contains('chip')) { picked = picked === t.dataset.v ? null : t.dataset.v; render(); }
+  else if (t.classList.contains('slot')) { setResp(q, +t.dataset.b, picked); picked = null; render(); }
+  else if (t.id === 'retry') start(S.order.filter(n => !isRight(Q[n])), true);
+  else if (t.id === 'again' || (t.id === 'reset' && confirm('Restart and clear all progress?'))) start(Object.keys(Q).map(Number), false);
+  else if (t.id === 'theme') {
+    const dark = document.documentElement.dataset.theme !== 'dark' && !(document.documentElement.dataset.theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+    setTheme(dark ? 'dark' : 'light');
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.matches('select[data-b]')) { setResp(Q[S.order[S.pos]], +t.dataset.b, t.value); renderGrid(); }
+  else if (t.id === 'shufQ') { // reorders without losing answers (answers are keyed by question number)
+    const cur = S.order[S.pos]; S.shufQ = t.checked; S.order = t.checked ? shuffle(S.ids) : S.ids.slice();
+    S.pos = S.order.indexOf(cur); save(); render();
+  }
+  else if (t.id === 'shufA') { S.shufA = t.checked; makeOpts(); save(); render(); }
+});
+// HTML5 drag & drop (desktop); tap-to-place covers touch screens.
+document.addEventListener('dragstart', e => { const c = e.target.closest && e.target.closest('.chip'); if (c) e.dataTransfer.setData('text/plain', c.dataset.v); });
+document.addEventListener('dragover', e => { const s = e.target.closest && e.target.closest('.slot:not(:disabled)'); if (s) { e.preventDefault(); s.classList.add('over'); } });
+document.addEventListener('dragleave', e => { const s = e.target.closest && e.target.closest('.slot'); if (s) s.classList.remove('over'); });
+document.addEventListener('drop', e => {
+  const s = e.target.closest && e.target.closest('.slot:not(:disabled)'); if (!s) return;
+  e.preventDefault(); setResp(Q[S.order[S.pos]], +s.dataset.b, e.dataTransfer.getData('text/plain')); render();
+});
+
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem(THEME, t); } catch (e) {}
+  $('#theme').textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
+}
+
+(async function init() {
+  let saved = null; try { saved = localStorage.getItem(THEME); } catch (e) {}
+  setTheme(saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  let data;
+  try { const res = await fetch('questions.json', {cache: 'no-cache'}); if (!res.ok) throw 0; data = await res.json(); }
+  catch (e) { data = JSON.parse(document.getElementById('qdata').textContent); } // file:// fallback
+  data.questions.forEach(q => Q[q.number] = q);
+  const ids = data.questions.map(q => q.number);
+  try { S = JSON.parse(localStorage.getItem(LS)); } catch (e) { S = null; }
+  // Saved progress is reused only if it still matches the question set.
+  if (S && S.order && S.order.every(n => Q[n]) && S.ids) { if (!S.opts || Object.keys(S.opts).length !== ids.length) makeOpts(); render(); }
+  else { S = null; start(ids, false); }
+})();
+</script>
+</body>
+</html>
