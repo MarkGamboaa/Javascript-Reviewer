@@ -152,10 +152,9 @@
         { "options": ["Number", "String", "Boolean", "Null", "Undefined"], "answer": "String" },
         { "options": ["Number", "String", "Boolean", "Null", "Undefined"], "answer": "Number" },
         { "options": ["Number", "String", "Boolean", "Null", "Undefined"], "answer": "Boolean" },
-        { "options": ["Number", "String", "Boolean", "Null", "Undefined"], "answer": "Number" }
+        { "options": ["Number", "String", "Boolean", "Null", "Undefined"], "answer": "String" }
       ],
-      "explanation": "Quoted text is a String, 2489.58 is a Number, and true is a Boolean.",
-      "note": "The PDF key says line 05 is a Number. In real JavaScript, 5 + \"Denver\" is the string \"5Denver\": when one operand of + is a string, + concatenates.",
+      "explanation": "Quoted text is a String, 2489.58 is a Number, and true is a Boolean. Line 05 is a String: 5 + \"Denver\" is \"5Denver\", because when one operand of + is a string, + concatenates.",
       "references": ["https://www.w3schools.com/js/js_datatypes.asp"]
     },
     {
