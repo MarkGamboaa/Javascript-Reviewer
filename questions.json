@@ -11,11 +11,10 @@
       "blanks": [
         { "answer": "value" },
         { "answer": "innerHTML" },
-        { "answer": "value" },
-        { "answer": "innerHTML" }
+        { "answer": "toLowerCase()" },
+        { "answer": "toLowerCase()" }
       ],
-      "explanation": "An <input> exposes what the user typed through .value; a <p> exposes its text through .innerHTML.",
-      "note": "The PDF key fills the if-statement with value / innerHTML. That doesn't work: input and text are already strings, so input.value and text.innerHTML are both undefined and the test always passes. For a case-insensitive check, the if-statement should be input.toLowerCase() == text.toLowerCase().",
+      "explanation": "An <input> exposes what the user typed through .value; a <p> exposes its text through .innerHTML. Calling toLowerCase() on both strings makes the comparison case-insensitive, so \"when in the course\" matches \"When in the course\".",
       "references": ["https://www.w3schools.com/jsref/prop_text_value.asp"]
     },
     {
@@ -63,12 +62,11 @@
       "blanks": [
         { "options": ["string", "array", "object", "number", "undefined"], "answer": "undefined" },
         { "options": ["string", "array", "object", "number", "undefined"], "answer": "string" },
-        { "options": ["string", "array", "object", "number", "undefined"], "answer": "array" },
+        { "options": ["string", "array", "object", "number", "undefined"], "answer": "object" },
         { "options": ["string", "array", "object", "number", "undefined"], "answer": "number" },
         { "options": ["string", "array", "object", "number", "undefined"], "answer": "object" }
       ],
-      "explanation": "An unassigned variable is undefined. \"3.4\" is a string. 2.4 is a number. typeof null is \"object\" (a long-standing quirk of the language).",
-      "note": "The PDF key says line 06 prints \"array\". In real JavaScript, typeof [] is \"object\". Use Array.isArray() to detect arrays.",
+      "explanation": "An unassigned variable is undefined. \"3.4\" is a string. An array is an object, so typeof textArray is \"object\" (use Array.isArray() to detect arrays). 2.4 is a number. typeof null is \"object\" (a long-standing quirk of the language).",
       "references": []
     },
     {
@@ -244,11 +242,10 @@
       "template": "function countdown(start) {\n    for ({{0}} {{1}} {{2}}) {\n        console.log(i);\n    }\n}",
       "blanks": [
         { "options": ["var i = start;", "var i == start;", "var i <= start;", "var i < start;"], "answer": "var i = start;" },
-        { "options": ["i<=0;", "i<0;", "i>0;", "i>=0;"], "answer": "i>0;" },
+        { "options": ["i<=0;", "i<0;", "i>0;", "i>=0;"], "answer": "i>=0;" },
         { "options": ["++i", "+i", "--i", "-i"], "answer": "--i" }
       ],
-      "explanation": "Start i at start and decrement with --i after each pass.",
-      "note": "The PDF key picks i>0, which stops at 1 and never prints 0. To count down to zero, the condition must be i>=0.",
+      "explanation": "Start i at start, keep looping while i>=0 so 0 is printed too, and decrement with --i after each pass. countdown(5) prints 5 4 3 2 1 0. (i>0 would stop before 0; i<=0 is false at the start, so nothing prints.)",
       "references": ["https://www.w3schools.com/js/js_operators.asp"]
     },
     {
