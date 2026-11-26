@@ -126,11 +126,10 @@
       "blanks": [
         { "options": ["()", "{}", "[]", "\"\""], "answer": "[]" },
         { "options": ["pop", "push", "sort", "splice"], "answer": "push" },
-        { "options": ["j++", "j+1", "j+2", "j--"], "answer": "j++" },
-        { "options": ["sum[j]", "numbers[j]", "numbers(j)", "array[j]"], "answer": "array[j]" }
+        { "options": ["j++", "j+1", "j+2", "j--"], "answer": "j+2" },
+        { "options": ["sum[j]", "numbers[j]", "numbers(j)", "array[j]"], "answer": "numbers[j]" }
       ],
-      "explanation": "[] creates an empty array literal and push() appends each random integer.",
-      "note": "The PDF key's last two answers are wrong. j = j++ assigns the old value back to j, so the loop never ends. To add every other element, use j = j+2. There is no variable named array, so the sum must use numbers[j].",
+      "explanation": "[] creates an empty array literal and push() appends each random integer. j = j+2 visits indexes 0, 2, 4, 6, 8: every other element, starting with the first. The array is named numbers, so the sum uses numbers[j]. (j = j++ would be a trap: j++ returns the old value, so j stays 0 and the loop never ends.)",
       "references": [
         "https://www.w3schools.com/jsref/jsref_push.asp",
         "https://www.w3schools.com/js/js_arrays.asp",
