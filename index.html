@@ -283,7 +283,7 @@ function renderTrack() {
   const pct = n => n / total * 100 + '%';
   $('#track').innerHTML = `<div class="stack" role="img" aria-label="${good} mastered, ${wrong} still learning, ${unseen} not seen"><i style="width:${pct(good)};background:var(--ok)"></i><i style="width:${pct(wrong)};background:var(--bad)"></i></div>
     <div class="stats"><span class="g">✓ Mastered <b>${good}</b></span><span class="r">✗ Still learning <b>${wrong}</b></span><span class="muted">○ Not seen <b>${unseen}</b></span></div>
-    <div class="grp" style="display:flex;gap:8px">${wrong ? `<button class="btn sm primary" id="reviewWrong">Review wrong (${wrong})</button>` : ''}${good + wrong ? `<button class="btn sm" id="clearHist">Clear history</button>` : ''}</div>`;
+    <div class="grp" style="display:flex;gap:8px">${wrong && S.finished ? `<button class="btn sm primary" id="reviewWrong">Review wrong (${wrong})</button>` : ''}</div>`;
 }
 
 
@@ -329,7 +329,6 @@ document.addEventListener('click', e => {
     render();
   }
   else if (t.id === 'reviewWrong') start(stillWrong(), true);
-  else if (t.id === 'clearHist' && confirm('Clear your right/wrong history for every question?')) { H = {}; saveH(); render(); }
   else if (t.dataset.k) {
     const k = t.dataset.k, cur = (S.resp[q.number] || [])[0] || '';
     setResp(q, 0, q.answer.length < 2 ? k : cur.includes(k) ? cur.replace(k, '') : (cur + k).slice(-q.answer.length));
