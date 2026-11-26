@@ -189,16 +189,23 @@ function hl(src) {
 
 const isDrag = q => q.type === 'dragdrop';
 const optsFor = (q, i) => (S.opts[q.number] || {})[i] || q.blanks[i].options;
-function makeOpts() {
-  S.opts = {};
-  for (const q of Object.values(Q)) {
-    const o = {};
-    if (q.type === 'mc') o.mc = S.shufA ? shuffle(q.options.map(x => x.key)) : q.options.map(x => x.key);
-    else if (isDrag(q)) o.bank = S.shufA ? shuffle(q.bank) : q.bank;
-    else q.blanks.forEach((b, i) => o[i] = S.shufA ? shuffle(b.options) : b.options);
-    S.opts[q.number] = o;
-  }
+function optsFor1(q) {
+  const o = {};
+  if (q.type === 'mc') o.mc = S.shufA ? shuffle(q.options.map(x => x.key)) : q.options.map(x => x.key);
+  else if (isDrag(q)) o.bank = S.shufA ? shuffle(q.bank) : q.bank;
+  else q.blanks.forEach((b, i) => o[i] = S.shufA ? shuffle(b.options) : b.options);
+  return o;
 }
+function makeOpts() { S.opts = {}; for (const q of Object.values(Q)) S.opts[q.number] = optsFor1(q); }
+// Same choices, ignoring order: false when a question's options were edited after progress was saved.
+const sameSet = (a, b) => !!a && !!b && JSON.stringify(a.slice().sort()) === JSON.stringify(b.slice().sort());
+const optsMatch = (q, o) => !!o && (q.type === 'mc' ? sameSet(o.mc, q.options.map(x => x.key))
+  : isDrag(q) ? sameSet(o.bank, q.bank) : q.blanks.every((b, i) => sameSet(o[i], b.options)));
+// The letter a choice is shown under (differs from its key when answers are shuffled).
+const letter = (q, k) => 'ABCDEF'[S.opts[q.number].mc.indexOf(k)];
+const letters = (q, keys) => [...(keys || '')].map(k => letter(q, k)).sort().join(', ');
+// Row labels already ending in punctuation ("returns 100.", "ceil =") don't get an extra colon.
+const lab = t => /[.?:!=]$/.test(t) ? t : t + ':';
 function start(ids, retry) {
   S = { ids: ids.slice(), order: S && S.shufQ ? shuffle(ids) : ids.slice(), pos: 0, resp: {}, done: {}, finished: false, retry: !!retry,
         shufQ: S ? S.shufQ : false, shufA: S ? S.shufA : false, opts: {} };
@@ -209,7 +216,6 @@ const check = (q, r) => q.type === 'mc' ? [...(r[0] || '')].sort().join('') === 
 const isRight = q => check(q, S.resp[q.number] || []);
 // Mastery is re-graded from the saved last response, so fixing an answer key updates old attempts.
 const lastOk = n => H[n] && (H[n].resp ? check(Q[n], H[n].resp) : !!H[n].last);
-const correctText = q => q.type === 'mc' ? [q.answer] : q.blanks.map(b => b.answer);
 
 function control(q, i, done) {
   const v = (S.resp[q.number] || [])[i];
@@ -251,10 +257,10 @@ function render() {
   }
   if (done) h += feedback(q);
   // questions have no visible order: past the end, Next wraps to the first unanswered one; Finish appears once all are answered
-  const last = S.pos === n - 1, left = S.order.findIndex((m, i) => i !== S.pos && !S.done[m]);
+  const last = S.pos === n - 1, left = S.order.findIndex((m, i) => i !== S.pos && !S.done[m]), allDone = left < 0 && done;
   h += `<div class="actions"><div class="grp"><button class="btn" id="prev" ${S.pos ? '' : 'disabled'}>← Previous</button></div>
     <div class="grp">${done ? '' : `<button class="btn primary" id="submit">Submit</button>`}
-    <button class="btn${done ? ' primary' : ''}" id="next">${!last ? 'Next →' : left >= 0 ? 'Next →' : 'Finish'}</button>${last && left >= 0 ? `<button class="btn" id="finish">Finish</button>` : ''}</div></div>`;
+    <button class="btn${done ? ' primary' : ''}" id="next">${allDone || (last && left < 0) ? 'Finish' : 'Next →'}</button>${last && left >= 0 ? `<button class="btn" id="finish">Finish</button>` : ''}</div></div>`;
   $('#main').innerHTML = h;
 }
 
@@ -266,7 +272,7 @@ function feedback(q) {
     const r = S.resp[q.number] || [];
     ans = `<ul class="anslist">${q.blanks.map((b, i) => {
       const good = r[i] === b.answer;
-      return `<li>${q.rows ? esc(q.rows[i]) : `Blank ${i + 1}`}: ${good ? `<code class="yes">✓ ${esc(b.answer)}</code>`
+      return `<li>${q.rows ? esc(lab(q.rows[i])) : `Blank ${i + 1}:`} ${good ? `<code class="yes">✓ ${esc(b.answer)}</code>`
         : `<code class="no">✗ ${esc(r[i] || 'no answer')}</code> → <code class="yes">✓ ${esc(b.answer)}</code>`}</li>`;
     }).join('')}</ul>`;
   }
@@ -283,8 +289,7 @@ function renderTrack() {
   const good = Object.keys(Q).filter(lastOk).length, unseen = total - good - wrong;
   const pct = n => n / total * 100 + '%';
   $('#track').innerHTML = `<div class="stack" role="img" aria-label="${good} mastered, ${wrong} still learning, ${unseen} not answered"><i style="width:${pct(good)};background:var(--ok)"></i><i style="width:${pct(wrong)};background:var(--bad)"></i></div>
-    <div class="stats"><span class="g">✓ Mastered <b>${good}</b></span><span class="r">✗ Still learning <b>${wrong}</b></span><span class="muted">○ Not answered <b>${unseen}</b></span></div>
-    <div class="grp" style="display:flex;gap:8px">${wrong && S.finished ? `<button class="btn sm primary" id="reviewWrong">Review wrong (${wrong})</button>` : ''}</div>`;
+    <div class="stats"><span class="g">✓ Mastered <b>${good}</b></span><span class="r">✗ Still learning <b>${wrong}</b></span><span class="muted">○ Not answered <b>${unseen}</b></span></div>`;
 }
 
 
@@ -297,8 +302,10 @@ function renderScore() {
     <div class="stats" style="justify-content:center;display:flex;gap:14px;margin-top:6px"><span style="color:var(--ok)">✓ Correct <b>${right}</b></span><span style="color:var(--bad)">✗ Wrong <b>${wrongOnly.length}</b></span><span class="muted">○ Skipped <b>${skipped.length}</b></span></div></div>
     <div class="actions" style="justify-content:center">${wrong.length ? `<button class="btn primary" id="retry">Retry wrong &amp; skipped (${wrong.length})</button>` : ''}<button class="btn" id="again">Restart all ${Object.keys(Q).length}</button></div>`;
   if (wrong.length) h += `<h3 style="margin-top:22px">Review wrong &amp; skipped</h3><div class="review">${wrong.map(q => {
-    const r = S.resp[q.number] || [], c = correctText(q);
-    const lines = c.map((a, i) => `<li>${q.rows ? esc(q.rows[i]) + ': ' : q.template ? `Blank ${i + 1}: ` : ''}your answer <code>${esc(r[i] || '—')}</code> · correct <code>${esc(a)}</code></li>`).join('');
+    const r = S.resp[q.number] || [];
+    const lines = q.type === 'mc'
+      ? `<li>your answer <code>${esc(letters(q, r[0]) || '—')}</code> · correct <code>${esc(letters(q, q.answer))}</code></li>`
+      : q.blanks.map((b, i) => `<li>${q.rows ? esc(lab(q.rows[i])) + ' ' : q.template ? `Blank ${i + 1}: ` : ''}your answer <code>${esc(r[i] || '—')}</code> · correct <code>${esc(b.answer)}</code></li>`).join('');
     return `<div class="item"><h4>${esc(q.prompt.split('\n')[0])}${S.done[q.number] ? '' : ' <span class="muted">(skipped)</span>'}</h4><ul>${lines}</ul>${q.explanation ? `<div>${esc(q.explanation)}</div>` : ''}${q.note ? `<div class="note"><b>Heads up:</b> ${esc(q.note)}</div>` : ''}</div>`;
   }).join('')}</div>`;
   else h += `<p style="text-align:center">All correct. 🎉</p>`;
@@ -321,21 +328,21 @@ document.addEventListener('click', e => {
   const q = S.finished ? null : Q[S.order[S.pos]];
   if (t.id === 'prev') go(S.pos - 1);
   else if (t.id === 'next') {
-    if (S.pos < S.order.length - 1) return go(S.pos + 1);
     const left = S.order.findIndex((m, i) => i !== S.pos && !S.done[m]);
-    if (left >= 0) return go(left);
-    finish();
+    if (left < 0 && (S.done[q.number] || S.pos === S.order.length - 1)) return finish();
+    if (S.pos < S.order.length - 1) return go(S.pos + 1);
+    go(left);
   }
   else if (t.id === 'finish') finish();
   else if (t.id === 'submit') {
-    const r = S.resp[q.number] || [], need = q.type === 'mc' ? 1 : q.blanks.length;
-    if (r.filter(v => v != null && v !== '').length < need && !confirm('Some answers are empty. Submit anyway?')) return;
+    const r = S.resp[q.number] || [], mc = q.type === 'mc';
+    const have = mc ? (r[0] || '').length : r.filter(v => v != null && v !== '').length, need = mc ? q.answer.length : q.blanks.length;
+    if (have < need && !confirm(mc && need > 1 ? `You picked ${have} of ${need}. Submit anyway?` : 'Some answers are empty. Submit anyway?')) return;
     S.done[q.number] = true; save();
     const h = H[q.number] = H[q.number] || {r: 0, w: 0}, ok = isRight(q);
     h[ok ? 'r' : 'w']++; h.last = ok ? 1 : 0; h.resp = (S.resp[q.number] || []).slice(); saveH();
     render();
   }
-  else if (t.id === 'reviewWrong') start(stillWrong(), true);
   else if (t.dataset.k) {
     const k = t.dataset.k, cur = (S.resp[q.number] || [])[0] || '';
     setResp(q, 0, q.answer.length < 2 ? k : cur.includes(k) ? cur.replace(k, '') : (cur + k).slice(-q.answer.length));
@@ -355,7 +362,7 @@ document.addEventListener('change', e => {
   const t = e.target;
   if (t.matches('select[data-b]')) { setResp(Q[S.order[S.pos]], +t.dataset.b, t.value); }
   else if (t.id === 'shufQ') { // reorders without losing answers (answers are keyed by question number)
-    const cur = S.order[S.pos]; S.shufQ = t.checked; // shuffling on starts the new order from the current question, so the counter reads "1 of N" instead of jumping
+    const cur = S.order[S.pos]; S.shufQ = t.checked; // shuffling on puts the current question first in the new order
     S.order = t.checked ? [cur, ...shuffle(S.ids.filter(n => n !== cur))] : S.ids.slice();
     S.pos = S.order.indexOf(cur); save(); render();
   }
@@ -384,7 +391,17 @@ function setTheme(t) {
   const ids = data.questions.map(q => q.number);
   try { S = JSON.parse(localStorage.getItem(LS)); } catch (e) { S = null; }
   // Saved progress is reused only if it still matches the question set.
-  if (S && S.order && S.order.every(n => Q[n]) && S.ids && S.opts && ids.every(n => S.opts[n])) { if (Object.keys(S.opts).length !== ids.length) makeOpts(); render(); } // missing opts = questions were added
+  if (S && S.order && S.ids && S.opts) {
+    // Question bank edited since the save: drop removed questions, add new ones to a normal round,
+    // and refresh option lists that no longer match (otherwise a fixed answer can be unselectable).
+    S.ids = S.ids.filter(n => Q[n]); S.order = S.order.filter(n => Q[n]);
+    const added = S.retry ? [] : ids.filter(n => !S.ids.includes(n));
+    S.ids.push(...added); S.order.push(...added);
+    for (const q of Object.values(Q)) if (!optsMatch(q, S.opts[q.number])) S.opts[q.number] = optsFor1(q);
+    if (!S.order.length) { S = null; return start(ids, false); }
+    S.pos = Math.min(S.pos || 0, S.order.length - 1);
+    save(); render();
+  }
   else { S = null; start(ids, false); }
 })();
 </script>
