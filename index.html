@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+// iOS "Request Desktop Website" reports a Mac but keeps honouring width=device-width, so nothing changes.
+// A touch-screen "Mac" is an iPhone/iPad in desktop mode: give it a desktop-width layout like Android does.
+if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1 && screen.width < 980)
+  document.querySelector('meta[name=viewport]').content = 'width=980';
+</script>
 <title>JavaScript Review</title>
 <meta name="description" content="Practice quiz for Microsoft 98-382: Introduction to Programming Using JavaScript.">
 <style>
@@ -160,7 +166,7 @@ select.bad,.slot.bad{border-color:var(--bad)!important;background:var(--bad-soft
 <script>
 const LS = 'jsq-382-v1', THEME = 'jsq-382-theme', HIST = 'jsq-382-hist';
 let Q = {}, S = null, picked = null; // picked = chip value chosen by tap (mobile drag alternative)
-let H = {}; // lifetime record per question {r: right count, w: wrong count, last: 1|0}; survives Restart
+let H = {}; // lifetime record per question {r: right count, w: wrong count, last: 1|0}; cleared by the top Restart button
 const saveH = () => { try { localStorage.setItem(HIST, JSON.stringify(H)); } catch (e) {} };
 const stillWrong = () => Object.keys(Q).map(Number).filter(n => H[n] && !H[n].last);
 const $ = s => document.querySelector(s);
@@ -322,7 +328,8 @@ document.addEventListener('click', e => {
   else if (t.classList.contains('chip')) { picked = picked === t.dataset.v ? null : t.dataset.v; render(); }
   else if (t.classList.contains('slot')) { setResp(q, +t.dataset.b, picked); picked = null; render(); }
   else if (t.id === 'retry') start(S.order.filter(n => !isRight(Q[n])), true);
-  else if (t.id === 'again' || (t.id === 'reset' && confirm('Restart and clear all progress?'))) start(Object.keys(Q).map(Number), false);
+  else if (t.id === 'reset' && confirm('Restart and clear all progress, including your right/wrong history?')) { H = {}; saveH(); start(Object.keys(Q).map(Number), false); }
+  else if (t.id === 'again') start(Object.keys(Q).map(Number), false);
   else if (t.id === 'theme') {
     const dark = document.documentElement.dataset.theme !== 'dark' && !(document.documentElement.dataset.theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
     setTheme(dark ? 'dark' : 'light');
@@ -332,7 +339,8 @@ document.addEventListener('change', e => {
   const t = e.target;
   if (t.matches('select[data-b]')) { setResp(Q[S.order[S.pos]], +t.dataset.b, t.value); }
   else if (t.id === 'shufQ') { // reorders without losing answers (answers are keyed by question number)
-    const cur = S.order[S.pos]; S.shufQ = t.checked; S.order = t.checked ? shuffle(S.ids) : S.ids.slice();
+    const cur = S.order[S.pos]; S.shufQ = t.checked; // shuffling on starts the new order from the current question, so the counter reads "1 of N" instead of jumping
+    S.order = t.checked ? [cur, ...shuffle(S.ids.filter(n => n !== cur))] : S.ids.slice();
     S.pos = S.order.indexOf(cur); save(); render();
   }
   else if (t.id === 'shufA') { S.shufA = t.checked; makeOpts(); save(); render(); }
